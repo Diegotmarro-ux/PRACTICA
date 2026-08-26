@@ -1,6 +1,8 @@
 const filas = 15;
 const columnas = 10;
 
+const celdas = {};
+
 const contenedor = document.getElementById("cuadricula");
 
 const tabla = document.createElement("table");
@@ -15,7 +17,7 @@ for (let columna = 1; columna <= columnas; columna++) {
     const encabezado = document.createElement("th");
     const letra = String.fromCharCode(64 + columna);
 
-    encabezado.textContent = letra;
+    encabezado.textContent = letra;   
     filaEncabezado.appendChild(encabezado);
 }
 
@@ -32,11 +34,47 @@ for (let fila = 1; fila <= filas; fila++) {
     for (let columna = 1; columna <= columnas; columna++) {
         const celda = document.createElement("td");
 
-        celda.textContent = " ";
+        const letra = String.fromCharCode(64+ columna)
+        const nombreCelda = letra + fila; 
+         
+        celdas[nombreCelda]= "";
+
+        celda.addEventListener ("dblclick", function () {
+             const input = document.createElement("input");
+
+             input.value = celdas [nombreCelda]; 
+             celda.textContent= "";
+
+             celda.appendChild(input)
+
+             input.focus (); 
+
+             input.addEventListener("keydown", function (evento) {
+
+                 if (evento.key === "Enter") {
+
+
+                    let valor = input.value;
+
+                    if (valor !== "" && !isNaN(valor)) {
+                             celdas[nombreCelda] = Number(valor);
+                                               } else {
+                                 celdas[nombreCelda] = valor;
+                                     }
+
+                    celda.textContent = celdas[nombreCelda];
+               
+
+                 }
+             });
+        }); 
+
         filaTabla.appendChild(celda);
     }
 
-    tabla.appendChild(filaTabla);
+    tabla.appendChild(filaTabla); 
 }
 
 contenedor.appendChild(tabla);
+
+ console.log(celdas) ;   
