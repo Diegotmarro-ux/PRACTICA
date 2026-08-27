@@ -45,10 +45,13 @@ for (let fila = 1; fila <= filas; fila++)
         const letra = String.fromCharCode(64+ columna)
 
         const nombreCelda = letra + fila; 
-         
-        celdas[nombreCelda]= {
+         celda.id= nombreCelda;
+           
+          celdas[nombreCelda]= {
                      contenido: "",
-                                 valor: ""
+                                 valor: "",
+                                     dependencias: [],
+                                        dependientes: []
 };
 
         celda.addEventListener ("dblclick", function () {
@@ -75,9 +78,11 @@ for (let fila = 1; fila <= filas; fila++)
                      console.log("Formula detectada: " + valor);
 
                             let tokens = tokenizarFormula(valor);
+                                       
+                                    buscarDependencias(nombreCelda, tokens);
 
-                                       resolverParentesis(tokens);
-                                       resolverMultiplicacionDivision(tokens);
+                                    resolverParentesis(tokens);
+                                    resolverMultiplicacionDivision(tokens);
 
                             let resultadoFinal = resolverSumaResta(tokens);
 
@@ -87,7 +92,8 @@ for (let fila = 1; fila <= filas; fila++)
                            
 
                      } else if (valor != "" && !isNaN(valor)) {
-
+       
+                             buscarDependencias(nombreCelda, []);
                             celdas[nombreCelda].valor = Number(valor);
 
                                             } else {
@@ -96,6 +102,8 @@ for (let fila = 1; fila <= filas; fila++)
 }
 
                     celda.textContent = celdas[nombreCelda].valor;
+
+                    recalcularDependientes(nombreCelda);
                
 
                  }
@@ -153,9 +161,9 @@ function resolverMultiplicacionDivision(tokens) {
         if (tokens[i] == "*" || tokens[i] == "/") {
 
 
-            let numero1 = Number(tokens[i - 1]);
+            let numero1 = obtenerValor(tokens[i - 1]);
 
-            let numero2 = Number(tokens[i + 1]);
+            let numero2 = obtenerValor(tokens[i + 1]);
 
                                    let resultado;
 
@@ -180,9 +188,9 @@ function resolverSumaResta(tokens) {
 
     while (tokens.length > 1) {
 
-        let numero1 = Number(tokens[0]);
+        let numero1 = obtenerValor(tokens[0]);
         let operador = tokens[1];
-        let numero2 = Number(tokens[2]);
+        let numero2 = obtenerValor(tokens[2]);
         let resultado;
 
         if (operador == "+") {
@@ -224,3 +232,63 @@ function resolverParentesis(tokens) {
     return tokens;
 }
 
+function obtenerValor(token) {
+
+    if (celdas[token] != undefined) {
+        return Number(celdas[token].valor);
+    } else {
+        return Number(token);
+    }
+
+}
+
+ function buscarDependencias(nombreCelda, tokens) {
+
+    for (let i = 0; i < celdas[nombreCelda].dependencias.length; i++) {
+
+        let anterior = celdas[nombreCelda].dependencias[i];
+
+        let posicion = celdas[anterior].dependientes.indexOf(nombreCelda);
+
+        if (posicion != -1) {
+            celdas[anterior].dependientes.splice(posicion, 1);
+        }
+    }
+
+    celdas[nombreCelda].dependencias = [];
+
+    for (let i = 0; i < tokens.length; i++) {
+
+        if (celdas[tokens[i]] != undefined) {
+
+            celdas[nombreCelda].dependencias.push(tokens[i]);
+
+            if (!celdas[tokens[i]].dependientes.includes(nombreCelda)) {
+                celdas[tokens[i]].dependientes.push(nombreCelda);
+            }
+        }
+    }
+}
+           
+function recalcularDependientes(nombreCelda) {
+
+    for (let i = 0; i < celdas[nombreCelda].dependientes.length; i++) {
+
+        let nombreDependiente = celdas[nombreCelda].dependientes[i];
+
+        let formula = celdas[nombreDependiente].contenido;
+
+        let tokens = tokenizarFormula(formula);
+
+        resolverParentesis(tokens);
+        resolverMultiplicacionDivision(tokens);
+
+        let resultado = resolverSumaResta(tokens);
+
+        celdas[nombreDependiente].valor = resultado;
+
+        document.getElementById(nombreDependiente).textContent = resultado;
+
+        recalcularDependientes(nombreDependiente);
+    }
+}
