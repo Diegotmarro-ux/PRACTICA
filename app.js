@@ -55,6 +55,7 @@ for (let fila = 1; fila <= filas; fila++)
 };
 
         celda.addEventListener ("dblclick", function () {
+
              const input = document.createElement("input");
 
              input.value = celdas [nombreCelda].contenido;
@@ -72,33 +73,73 @@ for (let fila = 1; fila <= filas; fila++)
                     let valor = input.value;
                     celdas[nombreCelda].contenido = valor;
 
-                    if (valor[0] == "=") {
+ if (valor[0] == "=") {
+  
+let tipoFuncion = "";
 
+if (valor.substring(0, 6) == "=SUMA(") {
+
+    tipoFuncion = "SUMA";
+
+} else if (valor.substring(0, 10) == "=PROMEDIO(") {
+
+    tipoFuncion = "PROMEDIO";
+
+} else if (valor.substring(0, 5) == "=MAX(") {
+
+    tipoFuncion = "MAX";
+
+} else if (valor.substring(0, 5) == "=MIN(") {
+
+    tipoFuncion = "MIN";
+}
+
+if (tipoFuncion != "") {
+
+    let parentesis = valor.indexOf("(");
+
+    let contenido = valor.substring(
+        parentesis + 1,
+        valor.length - 1
+    );
+
+    let partes = contenido.split(":");
+
+    let rango = obtenerCeldasRango(
+        partes[0],
+        partes[1]
+    );
+  
+    buscarDependencias(nombreCelda, rango);
+
+    celdas[nombreCelda].valor =
+        evaluarFuncionRango(valor, tipoFuncion);
+
+      
+} else {
+
+    let tokens = tokenizarFormula(valor);
+
+    buscarDependencias(nombreCelda, tokens);
+
+    resolverParentesis(tokens);
+    resolverMultiplicacionDivision(tokens);
+
+    let resultadoFinal = resolverSumaResta(tokens);
+
+    celdas[nombreCelda].valor = resultadoFinal;
+}
                            
-                     console.log("Formula detectada: " + valor);
-
-                            let tokens = tokenizarFormula(valor);
-                                       
-                                    buscarDependencias(nombreCelda, tokens);
-
-                                    resolverParentesis(tokens);
-                                    resolverMultiplicacionDivision(tokens);
-
-                            let resultadoFinal = resolverSumaResta(tokens);
-
-                                 console.log("Resultado: " + resultadoFinal);
-
-                       celdas[nombreCelda].valor = resultadoFinal;
-                           
-
-                     } else if (valor != "" && !isNaN(valor)) {
+} else if (valor != "" && !isNaN(valor)) {
        
-                             buscarDependencias(nombreCelda, []);
-                            celdas[nombreCelda].valor = Number(valor);
+     buscarDependencias(nombreCelda, []);
+          celdas[nombreCelda].valor = Number(valor);
 
-                                            } else {
+         } else {
 
-                             celdas[nombreCelda].valor = valor;
+        buscarDependencias(nombreCelda, []);
+
+                                    celdas[nombreCelda].valor = valor;
 }
 
                     celda.textContent = celdas[nombreCelda].valor;
@@ -269,7 +310,7 @@ function obtenerValor(token) {
         }
     }
 }
-           
+          
 function recalcularDependientes(nombreCelda) {
 
     for (let i = 0; i < celdas[nombreCelda].dependientes.length; i++) {
@@ -278,17 +319,118 @@ function recalcularDependientes(nombreCelda) {
 
         let formula = celdas[nombreDependiente].contenido;
 
-        let tokens = tokenizarFormula(formula);
+        let resultado;
 
-        resolverParentesis(tokens);
-        resolverMultiplicacionDivision(tokens);
+        if (formula.substring(0, 6) == "=SUMA(") {
 
-        let resultado = resolverSumaResta(tokens);
+           resultado = evaluarFuncionRango(formula, "SUMA");
+         
+            } else if (formula.substring(0, 10) == "=PROMEDIO(") {
+
+                 resultado = evaluarFuncionRango(formula, "PROMEDIO");
+
+            } else if (formula.substring(0, 5) == "=MAX(") {
+
+               resultado = evaluarFuncionRango(formula, "MAX");
+
+            } else  if (formula.substring(0, 5) == "=MIN(") {
+
+                 resultado = evaluarFuncionRango(formula, "MIN");
+
+               } else {
+      
+
+            let tokens = tokenizarFormula(formula);
+
+            resolverParentesis(tokens);
+            resolverMultiplicacionDivision(tokens);
+
+            resultado = resolverSumaResta(tokens);
+        }
 
         celdas[nombreDependiente].valor = resultado;
 
         document.getElementById(nombreDependiente).textContent = resultado;
 
         recalcularDependientes(nombreDependiente);
+    }
+}
+
+
+function obtenerCeldasRango(inicio, fin) {
+
+    let columnaInicio = inicio.charCodeAt(0) - 64;
+
+    let filaInicio = Number(inicio.substring(1));
+
+    let columnaFin = fin.charCodeAt(0) - 64;
+    let filaFin = Number(fin.substring(1));
+
+    let rango = [];
+
+    for (let fila = filaInicio; fila <= filaFin; fila++) {
+
+        for (let columna = columnaInicio; columna <= columnaFin; columna++) {
+
+            let letra = String.fromCharCode(64 + columna);
+
+            rango.push(letra + fila);
+        }
+    }
+
+    return rango;
+}
+
+function evaluarFuncionRango(formula, tipo) {
+
+    let parentesis = formula.indexOf("(");
+
+    let contenido = formula.substring(
+        parentesis + 1,
+        formula.length - 1
+    );
+
+    let partes = contenido.split(":");
+
+    let rango = obtenerCeldasRango(
+        partes[0],
+        partes[1]
+    );
+
+    let suma = 0;
+    let mayor = 0;
+    let menor = 0;
+
+    for (let i = 0; i < rango.length; i++) {
+
+        let valorCelda = Number(celdas[rango[i]].valor);
+
+        suma = suma + valorCelda;
+
+        if (i == 0) {
+            mayor = valorCelda;
+            menor = valorCelda;
+        }
+
+        if (valorCelda > mayor) {
+            mayor = valorCelda;
+        }
+
+        if (valorCelda < menor) {
+            menor = valorCelda;
+        }
+    }
+
+    if (tipo == "SUMA") {
+        return suma;
+
+    } else if (tipo == "PROMEDIO") {
+        return suma / rango.length;
+
+    } else if (tipo == "MAX") {
+        return mayor;
+
+    } else if (tipo == "MIN") {
+        return menor;
     }
 }
