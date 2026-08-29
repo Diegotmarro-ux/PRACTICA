@@ -45,3 +45,37 @@ function recalcularDependientes(nombreCelda) {
         recalcularDependientes(nombreDependiente);
     }
 }
+
+function tieneCircular(nombreCelda, referencias, revisadas) {
+
+    if (revisadas == undefined) {
+        revisadas = [];
+    }
+
+    for (let i = 0; i < referencias.length; i++) {
+
+        let referencia = referencias[i];
+        if (celdas[referencia] == undefined) {
+         continue;
+        }
+
+        if (referencia == nombreCelda) {
+            return true;
+        }
+
+        if (!revisadas.includes(referencia)) {
+
+            revisadas.push(referencia);
+
+            if (tieneCircular(
+                nombreCelda,
+                celdas[referencia].dependencias,
+                revisadas
+            )) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}

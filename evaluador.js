@@ -51,10 +51,20 @@ function resolverMultiplicacionDivision(tokens) {
                 resultado = numero1 * numero2;
 
             } else {
-                resultado = numero1 / numero2;
-            }
+                 if (numero2 == 0) {
+            
 
-            tokens.splice(i - 1, 3, resultado);
+            tokens.splice( 0,
+            tokens.length,
+            "#DIV/0!"
+        );
+        
+    return tokens;    
+
+        }
+    resultado = numero1 / numero2;
+}
+  tokens.splice(i - 1, 3, resultado);
 
             i = i - 1;
         }
@@ -98,7 +108,12 @@ function resolverParentesis(tokens) {
         let dentro = tokens.slice(apertura + 1, cierre);
 
         resolverMultiplicacionDivision(dentro);
+        if (dentro[0] == "#DIV/0!") {
 
+    tokens.splice(0, tokens.length, "#DIV/0!");
+
+    return tokens;
+}
         let resultado = resolverSumaResta(dentro);
 
         tokens.splice(
@@ -223,9 +238,58 @@ function obtenerTipoFuncion(formula) {
 
 function calcularFormula(formula) {
 
+    let parentesis = 0;
+    let operadores = "+-*/";
+
+    for (let i = 1; i < formula.length; i++) {
+
+        if (formula[i] == "(") {
+            parentesis++;
+        }
+
+        if (formula[i] == ")") {
+            parentesis--;
+        }
+
+        if (parentesis < 0) {
+            return "#ERROR!";
+        }
+
+        if (operadores.includes(formula[i]) &&
+            operadores.includes(formula[i + 1])) {
+
+            return "#ERROR!";
+        }
+    }
+
+    if (parentesis != 0 ||
+        formula.length == 1 ||
+        operadores.includes(formula[1]) ||
+        operadores.includes(formula[formula.length - 1])) {
+
+        return "#ERROR!";
+    }
+
+    let error = obtenerErrorReferencias(formula);
+
+    if (error != "") {
+        return error;
+    }
+
     let tipoFuncion = obtenerTipoFuncion(formula);
 
-    if (tipoFuncion != "") {
+    if (tipoFuncion != "") { 
+
+    let contenido = formula.substring(
+        formula.indexOf("(") + 1,
+        formula.length - 1
+    );
+
+    let partes = contenido.split(":");
+
+    if (partes.length != 2) {
+        return "#ERROR!";
+    }
 
         return evaluarFuncionRango(formula, tipoFuncion);
 
@@ -234,11 +298,16 @@ function calcularFormula(formula) {
         let tokens = tokenizarFormula(formula);
 
         resolverParentesis(tokens);
+         if (tokens[0] == "#DIV/0!") {
+            
+         return "#DIV/0!";
+}
         resolverMultiplicacionDivision(tokens);
 
         return resolverSumaResta(tokens);
     }
 }
+
 function obtenerReferenciasFormula(formula) {
 
     let tipoFuncion = obtenerTipoFuncion(formula);
@@ -252,7 +321,10 @@ function obtenerReferenciasFormula(formula) {
             formula.length - 1
         );
 
-        let partes = contenido.split(":");
+        let partes = contenido.split(":"); 
+        if (partes.length != 2) {
+                return [];
+}
 
         return obtenerCeldasRango(
             partes[0],
@@ -267,7 +339,11 @@ function obtenerReferenciasFormula(formula) {
 
         for (let i = 0; i < tokens.length; i++) {
 
-            if (celdas[tokens[i]] != undefined) {
+            let primerCaracter = tokens[i][0];
+
+
+          if (primerCaracter >= "A" && primerCaracter <= "Z") {
+
 
                 referencias.push(tokens[i]);
             }
@@ -275,4 +351,28 @@ function obtenerReferenciasFormula(formula) {
 
         return referencias;
     }
+}
+
+function obtenerErrorReferencias(formula) {
+
+    let referencias = obtenerReferenciasFormula(formula);
+
+    for (let i = 0; i < referencias.length; i++) { 
+        if (celdas[referencias[i]] == undefined ||
+            celdas[referencias[i]].valor == "") {
+
+    return "#ERROR!";
+}
+
+        let valor = celdas[referencias[i]].valor;
+
+        if (valor == "#CIRCULAR!" ||
+            valor == "#DIV/0!" ||
+            valor == "#ERROR!") {
+
+            return valor;
+        }
+    }
+
+    return "";
 }

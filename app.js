@@ -69,29 +69,38 @@ for (let fila = 1; fila <= filas; fila++)
 
 
                     let valor = input.value.trim();
+
                     celdas[nombreCelda].contenido = valor;
+
 if (valor[0] == "=") {
 
     let referencias = obtenerReferenciasFormula(valor);
+       
+    if (tieneCircular(nombreCelda, referencias)) {
 
-    buscarDependencias(
-        nombreCelda,
-        referencias
-    );
+    buscarDependencias(nombreCelda, []);
+        celdas[nombreCelda].valor = "#CIRCULAR!";
+
+      } else {
+
+        buscarDependencias(nombreCelda, referencias);
 
     celdas[nombreCelda].valor =
         calcularFormula(valor);
-                           
+
+         }
+
 } else if (valor != "" && !isNaN(valor)) {
        
      buscarDependencias(nombreCelda, []);
-          celdas[nombreCelda].valor = Number(valor);
 
-         } else {
+    celdas[nombreCelda].valor = Number(valor);
+
+ } else {
 
         buscarDependencias(nombreCelda, []);
 
-                                    celdas[nombreCelda].valor = valor;
+         celdas[nombreCelda].valor = valor;
 }
 
                     celda.textContent = celdas[nombreCelda].valor;
