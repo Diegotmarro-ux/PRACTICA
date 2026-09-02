@@ -1,175 +1,85 @@
-Funcion nuevaCantidad <- ResolverMultiplicacionDivision(tokens Por Referencia, cantidad)
+Funcion resultado <- ResolverMultiplicacionDivision(numero1, operador, numero2)
 	
-    Definir i, j Como Entero
-    Definir numero1, numero2, resultado Como Real
-	
-    i <- 1
-	
-    Mientras i <= cantidad Hacer
-		
-        Si tokens[i] = "*" O tokens[i] = "/" Entonces
-			
-            numero1 <- ConvertirANumero(tokens[i - 1])
-            numero2 <- ConvertirANumero(tokens[i + 1])
-			
-            Si tokens[i] = "*" Entonces
-                resultado <- numero1 * numero2
-            SiNo
-                resultado <- numero1 / numero2
-            FinSi
-			
-            tokens[i - 1] <- ConvertirATexto(resultado)
-			
-            Para j <- i Hasta cantidad - 2 Hacer
-                tokens[j] <- tokens[j + 2]
-            FinPara
-			
-            cantidad <- cantidad - 2
-            i <- i - 1
-			
-        SiNo
-            i <- i + 1
-        FinSi
-		
-    FinMientras
-	
-    nuevaCantidad <- cantidad
+    Si operador = "*" Entonces
+        resultado <- numero1 * numero2
+    SiNo
+        resultado <- numero1 / numero2
+    FinSi
 	
 FinFuncion
 
 
-Funcion resultado <- ResolverSumaResta(tokens Por Referencia, cantidad)
+Funcion resultado <- ResolverSumaResta(numero1, operador, numero2)
 	
-    Definir numero1, numero2 Como Real
-    Definir operador Como Cadena
-    Definir j Como Entero
-	
-    Mientras cantidad > 1 Hacer
-		
-        numero1 <- ConvertirANumero(tokens[1])
-        operador <- tokens[2]
-        numero2 <- ConvertirANumero(tokens[3])
-		
-        Si operador = "+" Entonces
-            resultado <- numero1 + numero2
-        SiNo
-            resultado <- numero1 - numero2
-        FinSi
-		
-        tokens[1] <- ConvertirATexto(resultado)
-		
-        Para j <- 2 Hasta cantidad - 2 Hacer
-            tokens[j] <- tokens[j + 2]
-        FinPara
-		
-        cantidad <- cantidad - 2
-		
-    FinMientras
-	
-    resultado <- ConvertirANumero(tokens[1])
+    Si operador = "+" Entonces
+        resultado <- numero1 + numero2
+    SiNo
+        resultado <- numero1 - numero2
+    FinSi
 	
 FinFuncion
 
 
-Funcion nuevaCantidad <- ResolverParentesis(tokens Por Referencia, cantidad)
+Funcion prioridad <- ObtenerPrioridad(operador)
 	
-    Definir i, j Como Entero
-    Definir apertura, cierre Como Entero
-    Definir cantidadDentro Como Entero
-    Definir resultado Como Real
-    Definir encontrado Como Logico
-	
-    Dimension dentro[100]
-	
-    encontrado <- Verdadero
-	
-    Mientras encontrado = Verdadero Hacer
-		
-        encontrado <- Falso
-        cierre <- 0
-		
-        Para i <- 1 Hasta cantidad Hacer
-			
-            Si tokens[i] = ")" Y encontrado = Falso Entonces
-                cierre <- i
-                encontrado <- Verdadero
-            FinSi
-			
-        FinPara
-		
-        Si encontrado = Verdadero Entonces
-			
-            apertura <- cierre - 1
-			
-            Mientras tokens[apertura] <> "(" Hacer
-                apertura <- apertura - 1
-            FinMientras
-			
-            cantidadDentro <- 0
-			
-            Para i <- apertura + 1 Hasta cierre - 1 Hacer
-				
-                cantidadDentro <- cantidadDentro + 1
-                dentro[cantidadDentro] <- tokens[i]
-				
-            FinPara
-			
-            cantidadDentro <- ResolverMultiplicacionDivision(
-			dentro,
-			cantidadDentro
-            )
-			
-            resultado <- ResolverSumaResta(
-			dentro,
-			cantidadDentro
-            )
-			
-            tokens[apertura] <- ConvertirATexto(resultado)
-			
-            j <- apertura + 1
-			
-            Para i <- cierre + 1 Hasta cantidad Hacer
-                tokens[j] <- tokens[i]
-                j <- j + 1
-            FinPara
-			
-            cantidad <- cantidad - (cierre - apertura)
-			
-        FinSi
-		
-    FinMientras
-	
-    nuevaCantidad <- cantidad
+    Si operador = "*" O operador = "/" Entonces
+        prioridad <- 2
+    SiNo
+        prioridad <- 1
+    FinSi
 	
 FinFuncion
 
 
 Algoritmo EvaluacionExpresion
 	
-    Definir cantidad Como Entero
-    Definir resultado Como Real
+    Definir numero1, numero2, numero3 Como Real
+    Definir parcial, resultado Como Real
+    Definir operador1, operador2 Como Cadena
 	
-    Dimension tokens[100]
+    Dimension tokens[5]
 	
-    cantidad <- 5
-	
+    // Expresión tokenizada: 2 + 3 * 4
     tokens[1] <- "2"
     tokens[2] <- "+"
     tokens[3] <- "3"
     tokens[4] <- "*"
     tokens[5] <- "4"
 	
-    cantidad <- ResolverParentesis(tokens, cantidad)
+    numero1 <- ConvertirANumero(tokens[1])
+    operador1 <- tokens[2]
 	
-    cantidad <- ResolverMultiplicacionDivision(
-	tokens,
-	cantidad
-    )
+    numero2 <- ConvertirANumero(tokens[3])
+    operador2 <- tokens[4]
 	
-    resultado <- ResolverSumaResta(
-	tokens,
-	cantidad
-    )
+    numero3 <- ConvertirANumero(tokens[5])
+	
+    // Compara la prioridad de los operadores
+    Si ObtenerPrioridad(operador1) >= ObtenerPrioridad(operador2) Entonces
+		
+        Si operador1 = "*" O operador1 = "/" Entonces
+            parcial <- ResolverMultiplicacionDivision(numero1, operador1, numero2)
+        SiNo
+            parcial <- ResolverSumaResta(numero1, operador1, numero2)
+        FinSi
+		
+        Si operador2 = "*" O operador2 = "/" Entonces
+            resultado <- ResolverMultiplicacionDivision(parcial, operador2, numero3)
+        SiNo
+            resultado <- ResolverSumaResta(parcial, operador2, numero3)
+        FinSi
+		
+    SiNo
+		
+        parcial <- ResolverMultiplicacionDivision(numero2, operador2, numero3)
+		
+        Si operador1 = "*" O operador1 = "/" Entonces
+            resultado <- ResolverMultiplicacionDivision(numero1, operador1, parcial)
+        SiNo
+            resultado <- ResolverSumaResta(numero1, operador1, parcial)
+        FinSi
+		
+    FinSi
 	
     Escribir "Resultado: ", resultado
 	
