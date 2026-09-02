@@ -75,12 +75,24 @@ function resolverMultiplicacionDivision(tokens) {
 
 function resolverSumaResta(tokens) {
 
-    while (tokens.length > 1) {
+    while (tokens.length > 1) {  
+
+           if (tokens.length < 3) {
+            return "#ERROR!";
+        }
 
         let numero1 = obtenerValor(tokens[0]);
         let operador = tokens[1];
         let numero2 = obtenerValor(tokens[2]);
         let resultado;
+
+         if (operador != "+" && operador != "-") {
+            return "#ERROR!";
+        } 
+
+          if (isNaN(numero1) || isNaN(numero2)) {
+            return "#ERROR!";
+        }
 
         if (operador == "+") {
             resultado = numero1 + numero2;
@@ -91,7 +103,7 @@ function resolverSumaResta(tokens) {
         tokens.splice(0, 3, resultado);
     }
 
-    return tokens[0];
+        return obtenerValor(tokens[0])
 } 
 
 function resolverParentesis(tokens) {
@@ -298,14 +310,25 @@ function calcularFormula(formula) {
         let tokens = tokenizarFormula(formula);
 
         resolverParentesis(tokens);
-         if (tokens[0] == "#DIV/0!") {
-            
-         return "#DIV/0!";
-}
+
+         if (tokens[0] == "#DIV/0!") { 
+                return "#DIV/0!";
+            }
         resolverMultiplicacionDivision(tokens);
 
-        return resolverSumaResta(tokens);
-    }
+        if (tokens[0] == "#DIV/0!") {
+         return "#DIV/0!";
+          } 
+        let resultado = resolverSumaResta(tokens);
+
+        if (resultado == "#ERROR!" || isNaN(resultado)) {
+            return "#ERROR!";
+      }
+
+   return resultado;
+    
+          }
+
 }
 
 function obtenerReferenciasFormula(formula) {
@@ -357,12 +380,12 @@ function obtenerErrorReferencias(formula) {
 
     let referencias = obtenerReferenciasFormula(formula);
 
-    for (let i = 0; i < referencias.length; i++) { 
-        if (celdas[referencias[i]] == undefined ||
-            celdas[referencias[i]].valor == "") {
+    for (let i = 0; i < referencias.length; i++) {
 
-    return "#ERROR!";
-}
+        if (celdas[referencias[i]] == undefined  ||
+           celdas[referencias[i]].valor == "") {
+             return "#ERROR!";
+        }
 
         let valor = celdas[referencias[i]].valor;
 

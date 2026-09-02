@@ -18,8 +18,12 @@ const celdas = {};
     for (let i = 0; i < tokens.length; i++) {
 
         if (celdas[tokens[i]] != undefined) {
+        
+              if (!celdas[nombreCelda].dependencias.includes(tokens[i])) {
 
-            celdas[nombreCelda].dependencias.push(tokens[i]);
+             celdas[nombreCelda].dependencias.push(tokens[i]);
+    }
+
 
             if (!celdas[tokens[i]].dependientes.includes(nombreCelda)) {
                 celdas[tokens[i]].dependientes.push(nombreCelda);
