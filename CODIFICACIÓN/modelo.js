@@ -1,26 +1,5 @@
 const celdas = {};
-function guardarHoja() {
 
-    localStorage.setItem(
-        "hojaClara",
-        JSON.stringify(celdas)
-    );
-}
-    function cargarHoja() {
-
-    let datos = localStorage.getItem("hojaClara");
-
-    if (datos != null) {
-
-        Object.assign(celdas, JSON.parse(datos));
-
-        for (let nombreCelda in celdas) {
-
-            document.getElementById(nombreCelda).textContent =
-                celdas[nombreCelda].valor;
-        }
-    }
-}
  function buscarDependencias(nombreCelda, tokens) {
 
     for (let i = 0; i < celdas[nombreCelda].dependencias.length; i++) {
