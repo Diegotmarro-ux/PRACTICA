@@ -106,8 +106,8 @@ if (valor[0] == "=") {
                     celda.textContent = celdas[nombreCelda].valor;
 
                     recalcularDependientes(nombreCelda);
-               
 
+                    guardarHoja();
                  }
              });
         }); 
@@ -119,3 +119,4 @@ if (valor[0] == "=") {
 }
 
 contenedor.appendChild(tabla);
+cargarHoja();
