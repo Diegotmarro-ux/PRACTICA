@@ -10,10 +10,10 @@ body {
 h1 {
 
     color: #377154;
-    font-size: 34px;
+    font-size: 30px;
     letter-spacing: 1px;
-    margin-bottom: 20px;
-    padding-bottom: 8px;
+    margin-bottom: 16px;
+    padding-bottom: 6px;
     border-bottom: 2px solid #cfe3d8;
 }
 
@@ -44,9 +44,9 @@ table {
 
 /* Celdas */
 td {
-    min-width: 75px;
-    height: 28px;
-    padding: 4px 6px;
+    min-width: 55px;
+    height: 20px;
+    padding: 3px 5px;
     border: 1px solid #d0d0d0;
     text-align: right;
 }
@@ -54,13 +54,14 @@ td {
 
 /* Encabezados */
 th {
-    min-width: 35px;
-    height: 28px;
+    min-width: 30px;
+    height: 22px;
     background-color: #e9ecef;
     border: 1px solid #c5c5c5;
     text-align: center;
     font-weight: normal;
-}
+    font-size: 14px;
+} 
 
 
 /* Input cuando se edita una celda */
