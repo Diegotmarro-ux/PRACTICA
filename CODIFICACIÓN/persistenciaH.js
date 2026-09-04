@@ -14,8 +14,10 @@ function cargarHoja() {
         Object.assign(celdas, JSON.parse(datos));
 
         for (let nombre in celdas) {
+
             document.getElementById(nombre).textContent =
-                celdas[nombre].valor;
+               formatearCelda(nombre);
+                aplicarResaltado(nombre);
         }
     }
 }

@@ -1,5 +1,7 @@
 const filas = 15;
 const columnas = 10;
+let inputActivo = null;
+let celdaEditando = "";
 
 const contenedor = document.getElementById("cuadricula");
 
@@ -44,13 +46,48 @@ for (let fila = 1; fila <= filas; fila++)
 
         const nombreCelda = letra + fila; 
          celda.id= nombreCelda;
-           
-          celdas[nombreCelda]= {
-                     contenido: "",
-                                 valor: "",
-                                     dependencias: [],
-                                        dependientes: []
+         celdas[nombreCelda] = {
+         contenido: "",
+         valor: "",
+         dependencias: [],
+         dependientes: [],
+        formato: "normal",
 };
+
+
+ // Permite seleccionar y movernos entre celdas
+        celda.tabIndex = 0;   
+
+ // Muestra la celda seleccionada
+celda.addEventListener("focus", function () {
+    celda.style.outline = "2px solid green";
+    seleccionarCelda(nombreCelda);
+});
+
+celda.addEventListener("blur", function () {
+    celda.style.outline = "";
+});
+
+// Agrega la referencia de la celda a la fórmula activa
+celda.addEventListener("click", function () {
+
+        if (inputActivo != null &&
+        inputActivo.value[0] == "=" &&
+        nombreCelda != celdaEditando) {
+
+        inputActivo.value += nombreCelda;
+        inputActivo.focus();
+    }
+});
+    
+
+celda.addEventListener("keydown", function(evento) {
+
+
+    if (evento.target.tagName != "INPUT") {
+        moverCelda(nombreCelda, evento);
+    }
+});
 
         celda.addEventListener ("dblclick", function () {
 
@@ -62,13 +99,21 @@ for (let fila = 1; fila <= filas; fila++)
              celda.appendChild(input)
 
              input.focus (); 
+             inputActivo = input;
+             celdaEditando = nombreCelda;
 
              input.addEventListener("keydown", function (evento) {
+
+                 // Evita que la tecla llegue al evento de la celda
+                 evento.stopPropagation();
 
                  if (evento.key === "Enter") {
 
 
                     let valor = input.value.trim();
+
+                     // Evita que la tecla llegue al evento de la celda
+                     evento.stopPropagation();
 
                     celdas[nombreCelda].contenido = valor;
 
@@ -101,16 +146,20 @@ if (valor[0] == "=") {
         buscarDependencias(nombreCelda, []);
 
          celdas[nombreCelda].valor = valor;
+         
 }
+                   celda.textContent = formatearCelda(nombreCelda);
 
-                    celda.textContent = celdas[nombreCelda].valor;
+                    aplicarResaltado(nombreCelda);
 
                     recalcularDependientes(nombreCelda);
 
                     guardarHoja();
-                 }
+                    inputActivo = null;
+                   celdaEditando = "";
+                 }  
              });
-        }); 
+        });  
 
         filaTabla.appendChild(celda);
     }

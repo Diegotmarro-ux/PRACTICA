@@ -12,13 +12,23 @@
     <h1>HojaClara</h1>
 
     <div id="cuadricula"></div>
-    
+
+    <select id="formato">
+    <option value="normal">Normal</option>
+    <option value="moneda">Moneda</option>
+    <option value="porcentaje">Porcentaje</option>
+    <option value="decimal">Decimal</option>
+</select>
+
+    <button onclick="cambiarFormato()">Aplicar formato</button>
     <button onclick="exportarCSV()">Exportar CSV</button>
 
     <script src="modelo.js"></script>
     <script src="evaluador.js"></script>
     <script src="persistenciaH.js"></script>
+    <script src="mejoras8.js"></script>
     <script src="app.js"></script>
+
 
 </body>
 

@@ -44,7 +44,11 @@ function recalcularDependientes(nombreCelda) {
 
         celdas[nombreDependiente].valor = resultado;
 
-        document.getElementById(nombreDependiente).textContent = resultado;
+
+        document.getElementById(nombreDependiente).textContent =
+         formatearCelda(nombreDependiente);
+
+        aplicarResaltado(nombreDependiente);
 
         recalcularDependientes(nombreDependiente);
     }
