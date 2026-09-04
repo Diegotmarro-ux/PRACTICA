@@ -60,12 +60,7 @@ for (let fila = 1; fila <= filas; fila++)
 
  // Muestra la celda seleccionada
 celda.addEventListener("focus", function () {
-    celda.style.outline = "2px solid green";
     seleccionarCelda(nombreCelda);
-});
-
-celda.addEventListener("blur", function () {
-    celda.style.outline = "";
 });
 
 // Agrega la referencia de la celda a la fórmula activa
